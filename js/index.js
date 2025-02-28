@@ -1,100 +1,99 @@
 // ? =============> Global ===============>
-
+const loader = document.querySelector(".loading")
 // ! =============> When Start ===============>
-
+    getGames('mmorpg')
 
 // * =============> Events ===============>
+    // active nav bar 
+    document.querySelectorAll('.menu .nav-link').forEach(function(link){
+        link.addEventListener('click' , function(){
+            document.querySelector('.menu .active').classList.remove('active');
+            link.classList.add('active');
 
+            const category = link.getAttribute("data-category")
+            getGames(category)
+        })
+    })
 
 // ! =============> Functions ===============>
+async function getGames(categoryName){
+    loader.classList.remove("d-none")
+    const options = {
+	method: 'GET',
+	headers: {
+		'x-rapidapi-key': '60869025b5mshb2a9dc03a26b0f5p1226a5jsn0b579ad70df0',
+		'x-rapidapi-host': 'free-to-play-games-database.p.rapidapi.com'
+	}
+};
+    const apiResponse = await fetch(`https://free-to-play-games-database.p.rapidapi.com/api/games?category=${categoryName}` ,options);
+    const data = await apiResponse.json()
+    loader.classList.add("d-none")
+   
+    displayData(data)
+}
 
-//  =============> Validation ===============>
 
-// async function getNews(){
-//     const api = await fetch("https://newsapi.org/v2/everything?q=apple&from=2024-12-30&to=2024-12-30&sortBy=popularity&apiKey=API_KEY")
-//     const response = await api.json()
-//     console.log(response.message)
-// }
-// getNews()
 
-// const btnCreate = document.getElementById("create-Account");
-// let userEmail = document.getElementById("user-email");
-// let userPassword = document.getElementById("user-password");
-// let btnLogin = document.getElementById("login");
-// let allRequired = document.getElementById("required");
-// let incorrect = document.getElementById("incorrect");
-// const btnMode = document.getElementById("mode");
 
-// btnCreate.addEventListener("click", function () {
-//   window.location = "./register.html";
-// });
 
-// btnLogin.addEventListener("click", function () {
-//   login();
-// });
-
-// if (localStorage.getItem("theme") !== null) {
-//   const themeData = localStorage.getItem("theme");
-
-//   if (themeData === "light") {
-//     mode.classList.replace("fa-sun", "fa-moon");
-//   } else {
-//     mode.classList.replace("fa-moon", "fa-sun");
-//   }
-//   document.querySelector("html").setAttribute("data-theme", themeData);
-// }
-
-// btnMode.addEventListener("click", function (e) {
-//   if (mode.classList.contains("fa-sun")) {
-//     document.querySelector("html").setAttribute("data-theme", "light");
-//     mode.classList.replace("fa-sun", "fa-moon");
-//     localStorage.setItem("theme", "light");
-//   } else {
-//     mode.classList.replace("fa-moon", "fa-sun");
-//     document.querySelector("html").setAttribute("data-theme", "dark");
-//     localStorage.setItem("theme", "dark");
-//   }
-// });
-
-// document.querySelector("form").addEventListener("submit", function (e) {
-//   e.preventDefault();
-// });
-
-// let userLists = [];
-
-// if (localStorage.getItem("userpackage") !== null) {
-//   userLists = JSON.parse(localStorage.getItem("userpackage"));
-// }
-
-// function emptyInput() {
-//   if (userEmail.value == "" || userPassword.value == "") {
-//     return false;
-//   }
-// }
-
-// function login() {
-//   if (emptyInput() == false) {
-//     allRequired.classList.remove("d-none");
-
-//     return false;
-//   } else {
-//     allRequired.classList.add("d-none");
-//   }
-
-//   let check = {
-//     email: userEmail.value,
-//     password: userPassword.value,
-//   };
-
-//   for (let i = 0; i < userLists.length; i++) {
-//     if (
-//       userLists[i].email == check.email &&
-//       userLists[i].password == check.password
-//     ) {
-//       window.location = "./main.html";
-//     } else {
-//       console.log("eror");
-//       incorrect.classList.remove("d-none");
-//     }
-//   }
-// }
+function displayData(data) {
+    let gamesBox = ``;
+    for (let i = 0; i < data.length; i++) {
+       let videPath = data[i].thumbnail.slice(0, data[i].thumbnail.lastIndexOf("/")) + "/videoplayback.webm";
+ 
+       gamesBox += `
+       <div class="col">
+       <div  onmouseenter="startVideo(event)" onmouseleave="stopVideo(event)" class="card h-100 bg-transparent" role="button" onclick="showDetails(${
+          data[i].id
+       })">
+          <div class="card-body">
+             <figure class="position-relative">
+                <img class="card-img-top object-fit-cover h-100" src="${data[i].thumbnail}" />
+              <video muted="true"  preload="none" loop   class="w-100 d-none h-100 position-absolute top-0 start-0 z-3">
+               <source src="${videPath}">
+               </video>
+             </figure>
+ 
+             <figcaption>
+ 
+                <div class="hstack justify-content-between">
+                   <h3 class="h6 small">${data[i].title}</h3>
+                   <span class="badge text-bg-primary p-2">Free</span>
+                </div>
+ 
+                <p class="card-text small text-center opacity-50">
+                   ${data[i].short_description.split(" ", 8)}
+                </p>
+ 
+             </figcaption>
+          </div>
+ 
+          <footer class="card-footer small hstack justify-content-between">
+ 
+             <span class="badge badge-color">${data[i].genre}</span>
+             <span class="badge badge-color">${data[i].platform}</span>
+ 
+          </footer>
+       </div>
+    </div>
+       `;
+    }
+ 
+    document.getElementById("gameData").innerHTML = gamesBox;
+ }
+ function startVideo(event){
+    const videoEl = event.target.querySelector("video")
+    videoEl.classList.remove("d-none")
+    videoEl.muted =true 
+    videoEl.play()
+    
+ }
+ function stopVideo(event){
+    const videoEl = event.target.querySelector("video")
+    videoEl.classList.add("d-none")
+    videoEl.muted =true 
+    videoEl.pause()
+ }
+function showDetails(id){
+    location.href = `./details.html?id=${id}`
+}
